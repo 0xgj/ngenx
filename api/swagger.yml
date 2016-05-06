@@ -1,0 +1,511 @@
+swagger: "2.0"
+basePath: /api/v1
+info:
+  version: 0.0.1
+  title: BC-DCOS API
+  description: China Mobile BC-DCOS api spec
+  license:
+    name: MIT
+    url: http://opensource.org/licenses/MIT
+
+paths:
+
+  /agents:
+    get:
+      summary: get agents list
+      description: |
+        Agents contain a status attribute that indicates the current agent state. You can filter on the agent status when you complete a list agent request. The agent status is returned in the response body. 
+      tags:
+        - agents
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/agent_info'
+      parameters:
+        - name: marker
+          in: query
+          description: |
+            The ID of the last-seen item. Use the limit parameter to make an initial limited request and use the ID of the last-seen item from the response as the marker parameter value in a subsequent limited re- quest.
+          type: string
+          required: false
+        - name: limit
+          in: query
+          description: |
+            Requests a page size of items. Returns a number of items up to a limit value. Use the limit parameter to make an initial limited request and use the ID of the last-seen item from the response as the marker pa- rameter value in a subsequent limited request.
+          type: number
+          format: integer
+          required: false
+        - name: name
+          in: query
+          description: |
+            Filters the response by a agent name, as a string.
+          type: string
+        - name: status
+          in: query
+          description: |
+            Filters the response by a agent status, as a string.
+          required: false
+          type: string
+        - name: owner
+          in: query
+          description: | 
+            Filters the response by the owner of a agent, as a string.
+          type: string
+          
+    post:
+      summary: (WIP;; dont's use) successfully add an agent.
+      description: (WIP;; dont's use) successfully add an agent
+      tags: 
+        - slaves
+      responses:
+        200:
+          description: OK
+   
+  /agents/{id}:
+    get:
+      summary: Shows details for a agent.
+      description: |
+        Includes agent details including configuration drive, extended status, and agent usage in- formation.
+      tags:
+        - agents
+        - details
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/agent_spec'
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: agent id 
+          type: string
+          required: true
+    delete:
+      summary: Delete an agent
+      description: delete an agent
+      tags:
+        - agents
+        - delete
+      responses:
+        200:
+          description: OK
+      parameters:
+        - name: id
+          type: string
+          required: true
+          in: path
+  /apps:
+    get:
+      description: get apps list, limit === -1 for all
+      tags: 
+        - apps
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/app_info'
+      parameters:
+        - name: marker
+          in: query
+          description: |
+            The ID of the last-seen item. Use the limit parameter to make an initial limited request and use the ID of the last-seen item from the response as the marker parameter value in a subsequent limited re- quest.
+          type: string
+          required: false
+        - name: limit
+          in: query
+          description: |
+            Requests a page size of items. Returns a number of items up to a limit value. Use the limit parameter to make an initial limited request and use the ID of the last-seen item from the response as the marker pa- rameter value in a subsequent limited request.
+          type: number
+          format: integer
+          required: false
+        - name: name
+          in: query
+          description: |
+            Filters the response by a app name, as a string.
+          type: string
+        - name: status
+          in: query
+          description: |
+            Filters the response by a agent status, as a string.
+          required: false
+          type: string
+        - name: owner
+          in: query
+          description: | 
+            Filters the response by the owner of a app, as a string.
+          type: string
+    post:
+      description: create an app
+      responses:
+        200:
+          description: OK
+      parameters:
+        - in: body
+          name: app_spec
+          required: true
+          schema:
+            $ref: '#/definitions/app_spec'
+
+
+  /metrics:
+    get:
+      description: (WIP) get all metrics, should be no use.
+      produces:
+        - application/json
+      tags:
+        - metrics
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/system_metrics'
+            
+  /metrics/system:
+    get:
+      tags:
+        - metrics
+        - system
+      summary: get system metrics
+      description: get system metrics
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/system_metrics'
+            
+  /metrics/agents/{id}:
+    get:
+      description: get metrics of a certain agent.
+      summary: get metrics of a certain agent.
+      tags:
+        - metrics
+        - agents
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/resources_metrics'
+      parameters:
+        - name: id
+          in: path
+          type: string
+          required: true
+
+  /metrics/tasks/{id}:
+    get:
+      description: (should be no used), get a task metrics.
+      summary: get a task's metrics.
+      produces:
+        - application/json
+      responses:
+        default:
+          description: Not implemented.
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+
+  /tasks/:
+    get:
+      summary: The list of all tasks disregarding their status, or a list of tasks matching the specified status filter.
+      description: The list of all tasks disregarding their status, or a list of tasks matching the specified status filter.
+      tags:
+        - tasks
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/task_info"
+        default:
+          description: Not implemented.
+    
+  /tasks/{id}:
+    get:
+      summary: get a task's spec
+      description: get a task's spec
+      tags:
+        - tasks
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: "#/definitions/task_spec"
+      parameters:
+        - name: id
+          description: task id
+          type: string
+          in: path
+          required: true
+  
+definitions:
+  app_spec:
+    type: object
+    properties:
+      id:
+        type: string
+      cmd:
+        type: string
+      args:
+        type: string
+      user:
+        type: string
+      instances:
+        type: number
+        format: integer
+      cpus:
+        type: number
+      mem:
+        type: number
+      disk:
+        type: number
+      constraints:
+        type: array
+        items:
+          type: string
+      ports:
+        type: array
+        items:
+          type: number
+          format: integer
+  task_info:
+    type: object
+    properties:
+      id:
+        type: string
+        description: task id
+      app_name:
+        type: string
+      type:
+        type: string
+      network:
+        type: string
+      image:
+        type: string
+      privileged:
+        type: boolean
+      cpus:
+        type: number
+      disk:
+        type: number
+      mem:
+        type: number
+      ports:
+        type: array
+        items:
+          type: string
+      slave_id:
+        type: string
+      state:
+        type: string
+      owner:
+        type: string
+      
+  system_metrics:
+    type: object
+    properties:
+      components_metrics:
+        $ref: '#/definitions/components_metrics'
+      resources_metrics:
+        $ref: '#/definitions/resources_metrics'
+      tasks_metrics:
+        $ref: '#/definitions/slaves_metrics'
+      slaves_metrics:
+        $ref: '#/definitions/tasks_metrics'
+        
+  tasks_metrics:
+    type: object
+    properties:
+      tasks_error:
+        type: number
+      tasks_failed:
+        type: number
+      tasks_finished:
+        type: number
+      tasks_killed:
+        type: number
+      tasks_killing:
+        type: number
+      tasks_lost:
+        type: number
+      tasks_running:
+        type: number
+      tasks_staging:
+        type: number
+      tasks_starting:
+        type: number
+        
+  slaves_metrics:
+    type: object
+    properties:
+      slaves_active:
+        type: number
+      slaves_connected:
+        type: number
+      slaves_disconnected:
+        type: number
+      slaves_inactive:
+        type: number
+
+  app_info:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      spec:
+        description: 'url of an app, eg. http://dcos.example.com/api/v1/agents/a291599e-6de2-41a6-88df-c443ddcef70d'
+        type: string
+
+  agent_info:
+    type: object
+    description: agent info
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      spec:
+        description: 'url of an agent, eg. http://dcos.example.com/api/v1/agents/a291599e-6de2-41a6-88df-c443ddcef70d'
+        type: string
+  agent_spec:
+    type: object
+    description: agent spec
+    properties:
+      id:
+        type: string
+      hostname:
+        type: string
+      resources:
+        
+        $ref: '#/definitions/resources'
+      used_resources:
+       
+        $ref: '#/definitions/resources'
+      attributes:
+        type: object
+      status:
+        type: string
+  task_spec:
+    type: object
+    properties:
+      app_id:
+        type: string
+      host:
+        type: string
+      id:
+        type: string
+      ports:
+        type: array
+        items:
+          type: number
+          format: integer
+      slave_id:
+        type: string
+ 
+  resources_metrics:
+    type: object
+    properties:
+      cpus_percent:
+        type: number
+      cpus_total:
+        type: number
+      cpus_used:
+        type: number
+      disk_percent:
+        type: number
+      disk_total:
+        type: number
+      disk_used:
+        type: number
+      mem_percent:
+        type: number
+      mem_total:
+        type: number
+      mem_used:
+        type: number
+        
+  components_metrics:
+    type: object
+    properties:
+      dcos-adminrouter-reload.service:
+        type: number
+      dcos-adminrouter-reload.timer:
+        type: number
+      dcos-adminrouter.service:
+        type: number
+      dcos-cluster-id.service:
+        type: number
+      dcos-cosmos.service:
+        type: number
+      dcos-ddt.service:
+        type: number
+      dcos-epmd.service:
+        type: number
+      dcos-exhibitor.service:
+        type: number
+      dcos-gen-resolvconf.service:
+        type: number
+      dcos-gen-resolvconf.timer:
+        type: number
+      dcos-history-service.service:
+        type: number
+      dcos-keepalived.service:
+        type: number
+      dcos-logrotate.service:
+        type: number
+      dcos-logrotate.timer:
+        type: number
+      dcos-marathon.service:
+        type: number
+      dcos-mesos-dns.service:
+        type: number
+      dcos-mesos-master.service:
+        type: number
+      dcos-minuteman.service:
+        type: number
+      dcos-oauth.service:
+        type: number
+      dcos-signal.service:
+        type: number
+      dcos-signal.timer:
+        type: number
+      dcos-spartan-watchdog.service:
+        type: number
+      dcos-spartan-watchdog.timer:
+        type: number
+      dcos-spartan.service:
+        type: number
+  resources:
+    type: object
+    properties:
+      cpus:
+        type: number
+      disk:
+        type: number
+      mem:
+        type: number
+      ports:
+        type: array
+        items:
+          type: string
+          pattern: '.*-.*'
+  
